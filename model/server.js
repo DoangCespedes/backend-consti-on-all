@@ -9,10 +9,11 @@ class Server {
         this.port = process.env.PORT
         this.usuariosPath = '/api/usuarios'
         this.authPath = '/api/auth'
+        this.emailsPath = '/api/emails';
 
         //Conectar a base de datos
         this.conectarDB()
-        //Middlewares (los middlewares son funciones que se ejecuta antes de llamar ya sea a un controlador o seguir con la ejecucion de mis peticiones. )
+        //Middlewares 
         this.middlewares()
         //Rutas de mi app
         this.routes();
@@ -37,6 +38,7 @@ s
     routes(){
         this.app.use(this.authPath, require('../routes/auth'))
         this.app.use(this.usuariosPath, require('../routes/user'))
+        this.app.use(this.emailsPath, require('../routes/emailRoutes'));
     }
 
     listen(){

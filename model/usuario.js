@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose')
-const { unique } = require('next/dist/build/utils')
+// const { unique } = require('next/dist/build/utils')
 
 const UsuarioSchema = Schema({
     nombre: {
