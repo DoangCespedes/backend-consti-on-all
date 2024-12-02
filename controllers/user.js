@@ -3,6 +3,41 @@ const Usuario = require('../model/usuario');
 const { encriptarPasswor } = require('../helpers/ecriptar-password');
 
 
+const usuariosGetByName = async (req = request, res = response) => {
+    const { nombre } = req.body; // Obtener el nombre desde el body de la petición
+
+    try {
+        // Validar que el nombre no sea undefined o vacío
+        if (!nombre) {
+            return res.status(400).json({
+                msg: 'El campo "nombre" es obligatorio en el body.'
+            });
+        }
+
+        // Buscar usuario por nombre
+        const usuario = await Usuario.findOne({ nombre });
+
+        if (!usuario) {
+            // Si no se encuentra el usuario, retornar un mensaje
+            return res.status(404).json({
+                msg: `No se encontró un usuario con el nombre: ${nombre}`
+            });
+        }
+
+        // Retornar los datos del usuario si existe
+        res.json({
+            msg: 'Usuario encontrado',
+            usuario
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            msg: 'Error al buscar el usuario. Contacte al administrador.'
+        });
+    }
+};
+
+
 
 const usuariosGet = async(req = request, res = response) => { 
 
@@ -102,6 +137,7 @@ const usuariosDelete = async(req, res = response) => {
 
 
 module.exports = {
+    usuariosGetByName,
     usuariosGet,
     usuariosPut,
     usuariosPost,

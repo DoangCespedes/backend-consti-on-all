@@ -1,5 +1,5 @@
 const {Router} = require('express');
-const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete } = require('../controllers/user');
+const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosGetByName } = require('../controllers/user');
 const { check } = require('express-validator');
 const { esPerfilValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validators');
 
@@ -12,7 +12,10 @@ const {
 } = require('../middlewares/index');
 
 
+
 const router = Router()
+
+router.post('/buscar', usuariosGetByName)
 
 router.get('/', usuariosGet);
 
