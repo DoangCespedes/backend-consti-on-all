@@ -8,10 +8,10 @@ const resend = new Resend(process.env.RESEND_API_KEY); // Clave API almacenada e
 const sendVerificationCode = async (email, code) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: '"Mi App" <onboarding@resend.dev>', // Remitente
-      to: [email], // Destinatario
-      subject: 'Código de Verificación', // Asunto
-      html: `<p>Tu código de verificación es: <strong>${code}</strong></p>`, // Contenido HTML
+      from: '"Consti-on-all" <noreply@collisioncenterpdr.com>', 
+      to: [email], 
+      subject: 'Código de Verificación', 
+      html: `<p>Tu código de verificación es: <strong>${code}</strong></p>`, 
     });
 
     if (error) {
