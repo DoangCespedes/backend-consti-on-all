@@ -6,19 +6,19 @@ const { generarJWT } = require('../helpers/generar-jwt');
 
 const login = async(req, res = response) => {
 
-    const { nombre , password } = req.body;
+    const { user_name , password } = req.body;
 
     try {
 
         //Verificar si el NOMBRE existe
-        const usuario = await Usuario.findOne({nombre})
+        const usuario = await Usuario.findOne({ where: {user_name}})
         if (!usuario) {
             return res.status(400).json({
                 msg:'Usuario / Password no son correctos - NOMBRE'
             })
         }
         //Si el usuario esta activo
-        if (!usuario.estado) {
+        if (!usuario.status) {
             return res.status(400).json({
                 msg:'Usuario / Password no son correctos - ESTADO: FALSE'
             })

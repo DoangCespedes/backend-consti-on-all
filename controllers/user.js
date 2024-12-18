@@ -1,145 +1,156 @@
-const { response, request, query } = require('express')
+const { response, request } = require('express');
 const Usuario = require('../model/usuario');
 const { encriptarPasswor } = require('../helpers/ecriptar-password');
 
-
 const usuariosGetByName = async (req = request, res = response) => {
-    const { nombre } = req.body; // Obtener el nombre desde el body de la petición
+    const { user_name } = req.body;
 
     try {
-        // Validar que el nombre no sea undefined o vacío
-        if (!nombre) {
+        // Validar que "nombre" no sea undefined, nulo o vacío
+        if (!user_name || typeof user_name !== 'string') {
             return res.status(400).json({
-                msg: 'El campo "nombre" es obligatorio en el body.'
+                msg: 'El campo "user name" es obligatorio y debe ser un string válido.'
             });
         }
 
         // Buscar usuario por nombre
-        const usuario = await Usuario.findOne({ nombre });
+        const usuario = await Usuario.findOne({
+            where: { user_name },
+        });
 
         if (!usuario) {
-            // Si no se encuentra el usuario, retornar un mensaje
             return res.status(404).json({
-                msg: `No se encontró un usuario con el nombre: ${nombre}`
+                msg: `No se encontró un usuario con el user name: ${user_name}`,
             });
         }
 
-        // Retornar los datos del usuario si existe
         res.json({
             msg: 'Usuario encontrado',
-            usuario
+            usuario,
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error en usuariosGetByName:', error);
         res.status(500).json({
-            msg: 'Error al buscar el usuario. Contacte al administrador.'
+            msg: 'Error al buscar el usuario. Contacte al administrador.',
         });
     }
 };
 
+const usuariosGet = async (req = request, res = response) => {
+    const { limite = 5, desde = 0 } = req.query;
 
+    try {
+        const queryEstado = { status: "ENABLED" };
 
-const usuariosGet = async(req = request, res = response) => { 
+        const [total, usuarios] = await Promise.all([
+            Usuario.count({ where: queryEstado }), // Contar usuarios
+            Usuario.findAll({
+                where: queryEstado,
+                offset: Number(desde),
+                limit: Number(limite),
+            }), // Obtener usuarios con paginación
+        ]);
 
-    // const {q , nombre= 'No name', apikey, page = 1, limit} = req.query
-    const {limite = 5, desde = 0} = req.query;
-    const queryEstado = { estado: true}
-    
-    // const usuarios = await Usuario.find(queryEstado)
-    // .skip(Number(desde))    
-    // .limit(Number(limite))
-
-    // const total = await Usuario.countDocuments( queryEstado );
-
-    // cada metodo llevava un tiempo de ejecucion , creamos la promesa para hacer los dos metodos en asincronia y el await nos va a aguardar a que las dos esten completas para poder retornar.
-    const [total, usuarios] = await Promise.all([
-        Usuario.countDocuments(queryEstado),
-        Usuario.find(queryEstado)
-        .skip(Number( desde ))
-        .limit(Number(limite))
-    ])
-
-    
-    res.json({
-        total,
-        usuarios
-    });  
-}
-
-const usuariosPut = async(req, res = response) => { 
-
-    const { id } = req.params
-    const { _id, password, google, correo, ...resto } = req.body;
-
-    //TODO validar contra base de datos
-    if (password) {
-        // Encriptar la contraseña
-        resto.password = await encriptarPasswor(password);
-
+        res.json({ total, usuarios });
+    } catch (error) {
+        console.error('Error en usuariosGet:', error);
+        res.status(500).json({
+            msg: 'Error al obtener usuarios. Contacte al administrador.',
+        });
     }
+};
 
-    const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true });
+const usuariosPut = async (req, res = response) => {
+    const { user_id } = req.params;
+    const { password, ...resto } = req.body;
 
-    res.json({
-        msg: 'Se actualizo con exito',
-        usuario
-    });   
-}
+    try {
+        if (password) {
+            // Encriptar contraseña si se envía
+            resto.password = await encriptarPasswor(password);
+        }
 
-const usuariosPost = async(req, res = response) => { 
+        // Actualizar el usuario
+        const usuario = await Usuario.update(resto, {
+            where: { user_id },
+            returning: true, // Devuelve el usuario actualizado
+        });
 
-    
-    // const body = req.body;  de esta manera recibiremos cualquier cosa que me quiera enviar el usuario, 
-    const {nombre , correo, password, perfil} = req.body; //encambio de esta manera ignoro cualquier cosa que me envie el usuario que yo no este esperando
-    
-    const usuario = new Usuario( {nombre , correo, password, perfil} )
-
-    //Verificar si el correo existe
-    const existeEmail = await Usuario.findOne({correo})
-    if (existeEmail) {
-        return res.status(400).json({
-            msg: 'El correo ya esta registrado'
-        })
+        res.json({
+            msg: 'Se actualizó con éxito',
+            usuario,
+        });
+    } catch (error) {
+        console.error('Error en usuariosPut:', error);
+        res.status(500).json({
+            msg: 'Error al actualizar el usuario. Contacte al administrador.',
+        });
     }
-    // Encriptar la contraseña
-    usuario.password = await encriptarPasswor(password);
+};
 
-    //Guardar en db
+const usuariosPost = async (req, res = response) => {
+    const { user_name, email, password, profile_id , first_name} = req.body;
 
-    await usuario.save();
+    try {
+        // Validar si el correo ya existe
+        // const existeEmail = await Usuario.findOne({ where: { correo } });
+        // if (existeEmail) {
+        //     return res.status(400).json({
+        //         msg: 'El correo ya está registrado',
+        //     });
+        // }
 
-    res.json({
-        asd: 'post API',
-        // body
-        //nombre,
-        usuario
-    });  
-}
+        // Crear usuario
+        const usuario = Usuario.build({
+            status: "ENABLED",
+            user_name,
+            first_name,
+            email,
+            password: await encriptarPasswor(password), // Encriptar contraseña
+            profile_id,
+        });
 
-const usuariosDelete = async(req, res = response) => { 
+        // Guardar en la base de datos
+        await usuario.save();
 
-    const { id } = req.params
+        res.json({
+            msg: 'Usuario creado con éxito',
+            usuario,
+        });
+    } catch (error) {
+        console.error('Error en usuariosPost:', error);
+        res.status(500).json({
+            msg: 'Error al crear el usuario. Contacte al administrador.',
+        });
+    }
+};
 
-    //fisicamente lo borramos
-    //const usuario = await Usuario.findByIdAndDelete( id );
+// const usuariosDelete = async (req, res = response) => {
+//     const { id } = req.params;
 
-    const usuario = await Usuario.findByIdAndUpdate( id, { estado: false})
+//     try {
+//         // Cambiar estado del usuario
+//         const usuario = await Usuario.update(
+//             { estado: false },
+//             { where: { id }, returning: true }
+//         );
 
-    const usuarioAutenticado = req.usuario
-
-    res.json({
-        usuario,
-        usuarioAutenticado
-
-    });   
-}
-
-
+//         res.json({
+//             msg: 'Usuario eliminado (estado actualizado)',
+//             usuario,
+//         });
+//     } catch (error) {
+//         console.error('Error en usuariosDelete:', error);
+//         res.status(500).json({
+//             msg: 'Error al eliminar el usuario. Contacte al administrador.',
+//         });
+//     }
+// };
 
 module.exports = {
     usuariosGetByName,
     usuariosGet,
     usuariosPut,
     usuariosPost,
-    usuariosDelete
-}
+    // usuariosDelete,
+};

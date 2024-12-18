@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const { dbConnection } = require('../database/config');
+const { db } = require('../database/config');
+const { PORT } = require('../config');
 
 class Server {
 
     constructor(){
         this.app = express();
-        this.port = process.env.PORT
         this.usuariosPath = '/api/usuarios'
         this.authPath = '/api/auth'
         this.emailsPath = '/api/emails';
@@ -21,7 +21,15 @@ class Server {
     }
 
     async conectarDB(){
-        dbConnection()
+        try {
+            await db.authenticate();
+            console.log("Database online")
+        } catch (error) {
+            throw new Error(error);
+            
+        }
+
+        
     }
 
     middlewares(){
@@ -34,7 +42,7 @@ class Server {
         //Directorio Publico
         this.app.use(express.static('public'));
     }
-s
+
     routes(){
         this.app.use(this.authPath, require('../routes/auth'))
         this.app.use(this.usuariosPath, require('../routes/user'))
@@ -42,8 +50,8 @@ s
     }
 
     listen(){
-        this.app.listen(process.env.PORT, () => {
-            console.log(`EL SERVIDOR ESTA CORRIENDO EN EL PUERTO : ${this.port}`);
+        this.app.listen(PORT, () => {
+            console.log(`EL SERVIDOR ESTA CORRIENDO EN EL PUERTO : ${PORT}`);
         });
     }
 }

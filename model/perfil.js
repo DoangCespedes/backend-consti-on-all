@@ -1,10 +1,19 @@
-const { Schema, model} = require('mongoose')
+const { DataTypes } = require('sequelize');
+const { db } = require('../database/config');
 
-const PerfilSchema = Schema({
-    perfil:{
-        type: String,
-        required: [true, 'El perfil es obligatorio']
-    }
-})
+const Perfil = db.define('Perfil', {
+    perfil: {
+        type: DataTypes.STRING,
+        // allowNull: false, // Es equivalente a `required: true`
+        // validate: {
+        //     notEmpty: {
+        //         msg: 'El perfil es obligatorio',
+        //     },
+        // },
+    },
+}, {
+    tableName: 'Perfiles', // Nombre de la tabla en la base de datos
+    timestamps: false, // Si no necesitas `createdAt` y `updatedAt`
+});
 
-module.exports = model('Perfil', PerfilSchema)
+module.exports = Perfil;

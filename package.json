@@ -19,7 +19,9 @@
     "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.2",
+    "mysql2": "^3.11.5",
     "nodemailer": "^6.9.16",
-    "resend": "^4.0.1"
+    "resend": "^4.0.1",
+    "sequelize": "^6.37.5"
   }
 }

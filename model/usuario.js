@@ -1,38 +1,58 @@
-const { Schema, model } = require('mongoose')
-// const { unique } = require('next/dist/build/utils')
+const { DataTypes } = require('sequelize');
+const { db } = require('../database/config'); // Asegúrate de importar correctamente tu conexión
 
-const UsuarioSchema = Schema({
-    nombre: {
-        type: String,
-        require: [true, 'El usuario es obligatorio'],
-        unique: true
+const User = db.define('User', {
+    user_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
     },
-    correo: {
-        type: String,
-        unique: true
+    user_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    telefono: {
-        type: String,
+    first_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    last_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isEmail: true, // Validación para asegurar que sea un email válido
+        },
+    },
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isNumeric: true, // Asegura que el valor sea numérico
+        },
     },
     password: {
-        type: String,
-        require: [ true, 'La contrasena es obligatorio'],
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    perfil: {
-        type: String,
-        require: true,
-        emun: ['SUPERVISOR_CORPORATIVO', 'USUARIO_CORPORATIVO', 'USUARIO_ASEGURADO']//USUARIO_CORPORATIVO
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    estado: {
-        type: Boolean,
-        default: true
-    }
-})
+    profile_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    id_persona: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        unique: true, // Asegura que no haya valores duplicados
+    },
+}, {
+    tableName: 'Users', // Especifica el nombre de la tabla en la base de datos
+    timestamps: false, // Desactiva las columnas de timestamps (createdAt, updatedAt) si no las usas
+});
 
-UsuarioSchema.methods.toJSON = function() {
-    const { __v, password, _id, ...usuario } = this.toObject();
-    usuario.uid = _id
-    return usuario;
-}
-
-module.exports = model( 'Usuario', UsuarioSchema)
+module.exports = User;
