@@ -125,32 +125,41 @@ const usuariosPost = async (req, res = response) => {
     }
 };
 
-// const usuariosDelete = async (req, res = response) => {
-//     const { id } = req.params;
+const usuariosDelete = async (req, res = response) => {
+    const { id } = req.body; // Se recibe el ID del usuario desde el cuerpo de la petición
 
-//     try {
-//         // Cambiar estado del usuario
-//         const usuario = await Usuario.update(
-//             { estado: false },
-//             { where: { id }, returning: true }
-//         );
+    try {
+        // Actualizar el status del usuario a "DISABLED"
+        const [affectedRows] = await Usuario.update(
+            { status: 'DISABLED' }, // Campos a actualizar
+            { where: { user_id: id } } // Condición de búsqueda
+        );
 
-//         res.json({
-//             msg: 'Usuario eliminado (estado actualizado)',
-//             usuario,
-//         });
-//     } catch (error) {
-//         console.error('Error en usuariosDelete:', error);
-//         res.status(500).json({
-//             msg: 'Error al eliminar el usuario. Contacte al administrador.',
-//         });
-//     }
-// };
+        // Verificar si se actualizó algún registro
+        if (affectedRows === 0) {
+            return res.status(404).json({
+                msg: `No se encontró un usuario con el ID: ${id}`,
+            });
+        }
+
+        res.json({
+            msg: 'Usuario deshabilitado con éxito',
+            user_id: id,
+        });
+    } catch (error) {
+        console.error('Error en usuariosDelete:', error);
+        res.status(500).json({
+            msg: 'Error al deshabilitar el usuario. Contacte al administrador.',
+        });
+    }
+};
+
+
 
 module.exports = {
     usuariosGetByName,
     usuariosGet,
     usuariosPut,
     usuariosPost,
-    // usuariosDelete,
+    usuariosDelete,
 };
