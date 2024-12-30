@@ -10,9 +10,9 @@ const esAdminPerfil = ( req, res = response, next ) => {
             msg: ' Se quiere verificar el perfil sin validar el token primero'
         })
     }
-    const { perfil, nombre } = req.usuario
+    const { profile_id, nombre } = req.usuario
 
-    if (perfil !== 'SUPERVISOR_CORPORATIVO') {
+    if (profile_id !== 4) {
         return res.status(401).json({
             msg:`${nombre} no es administrador - No puede realizar esta funcion`
         })
@@ -30,7 +30,7 @@ const tienePerfil = ( ...perfiles ) =>{
             })
         }
 
-        if (!perfiles.includes( req.usuario.perfile )) {
+        if (!perfiles.includes( req.usuario.profile_id )) {
             return res.status(401).json({
                 msg: `El servicio requiero alguno de estos perfiles ${perfiles}`
             })

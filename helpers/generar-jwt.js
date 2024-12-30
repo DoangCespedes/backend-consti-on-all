@@ -5,6 +5,7 @@ const generarJWT = ( uid = '') => {
     return new Promise((resolve, reject) => {
 
         const payload = { uid };
+        console.log('Aqui fue', payload)
 
         console.log('Clave secreta:', process.env.SECRETORPRIVATEKEY);
 

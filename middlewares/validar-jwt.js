@@ -1,52 +1,44 @@
+const { request, response } = require('express');
+const jwt = require('jsonwebtoken');
+const Usuario = require('../model/usuario');
 
-const { request, response} = require('express')
-const jwt = require('jsonwebtoken')
-const Usuario = require('../model/usuario')
-
-const validarJWT = async(req= request, res = response , next) =>{
-    const token = req.header('x-token')
+const validarJWT = async (req = request, res = response, next) => {
+    const token = req.header('consti-on-all-token');
 
     if (!token) {
         return res.status(401).json({
-            msg: 'No hay token en la peticion'
-        })
+            msg: 'No se encontró un token en la petición'
+        });
     }
+
     try {
-        const {uid} = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
-       
-        const usuario = await Usuario.findById(uid)
-        
-        //Verificar si el uid existe o es undefined
+        // Verificar el token
+        const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+
+        const usuario = await Usuario.findByPk(uid); 
+
         if (!usuario) {
             return res.status(401).json({
-                msg: 'Token no valido - usuario no existe DB'
-            })
+                msg: 'Token no válido - Usuario no existe en la base de datos'
+            });
         }
 
-        //Verificar si el uid tiene estado true
-        if (!usuario.estado) {
+        if (usuario.status != 'ENABLED') {
             return res.status(401).json({
-                msg: 'Token no valido - usuario con estado: false'
-            })
+                msg: 'Token no válido - Usuario con estado: false'
+            });
         }
-        
-        
+
         req.usuario = usuario;
         next();
-        
-        // Aqui me trae todo el payload del token
-        // const payload = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
-        // console.log(payload)
     } catch (error) {
-       console.log(error)
-       res.status(401).json({
-            msg: 'Token no valido'
-       }) 
+        console.error('Error al verificar el token:', error.message);
+        return res.status(401).json({
+            msg: 'Token no válido'
+        });
     }
-}
-
-
+};
 
 module.exports = {
     validarJWT
-}
+};

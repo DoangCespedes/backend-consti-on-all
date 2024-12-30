@@ -10,10 +10,11 @@ const User = db.define('User', {
     user_name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true, // Asegura que no haya valores duplicados
     },
     first_name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     last_name: {
         type: DataTypes.STRING,

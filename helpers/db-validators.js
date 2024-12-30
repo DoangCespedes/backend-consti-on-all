@@ -18,11 +18,11 @@ const emailExiste = async(correo = '') => {
     }
 }
 
-// id no existe
-const existeUsuarioPorId = async(id) => {
-    const existeUsuario = await usuario.findById(id)
+// user_id no existe
+const existeUsuarioPorId = async(user_id) => {
+    const existeUsuario = await usuario.findByPk(user_id)
     if (!existeUsuario) {
-        throw new Error(`El id : ${ id } no existe`)
+        throw new Error(`El id : ${ user_id } no existe`)
     }
 }
 

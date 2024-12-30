@@ -89,16 +89,19 @@ const usuariosPut = async (req, res = response) => {
 };
 
 const usuariosPost = async (req, res = response) => {
-    const { user_name, email, password, profile_id , first_name} = req.body;
+    const { user_name, email, password, profile_id, first_name } = req.body;
 
     try {
-        // Validar si el correo ya existe
-        // const existeEmail = await Usuario.findOne({ where: { correo } });
-        // if (existeEmail) {
-        //     return res.status(400).json({
-        //         msg: 'El correo ya está registrado',
-        //     });
-        // }
+        // Validar si el user_name ya existe
+        const userExists = await Usuario.findOne({
+            where: { user_name },
+        });
+
+        if (userExists) {
+            return res.status(400).json({
+                msg: `El user_name "${user_name}" ya está en uso.`,
+            });
+        }
 
         // Crear usuario
         const usuario = Usuario.build({

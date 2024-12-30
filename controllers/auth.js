@@ -11,16 +11,20 @@ const login = async(req, res = response) => {
     try {
 
         //Verificar si el NOMBRE existe
-        const usuario = await Usuario.findOne({ where: {user_name}})
+        const usuario = await Usuario.findOne({ 
+            where: {user_name},
+            attributes: ['user_id', 'user_name','password','status']
+        })
+        console.log('Usuario Encontrado',usuario)
         if (!usuario) {
             return res.status(400).json({
                 msg:'Usuario / Password no son correctos - NOMBRE'
             })
         }
         //Si el usuario esta activo
-        if (!usuario.status) {
+        if (usuario.status != 'ENABLED') {
             return res.status(400).json({
-                msg:'Usuario / Password no son correctos - ESTADO: FALSE'
+                msg:'Usuario / Password no son correctos - Status: DISABLED'
             })
         }
         // verificar la contrasena 
@@ -32,9 +36,9 @@ const login = async(req, res = response) => {
         }
         
         // generar el JWT
-        const token = await generarJWT( usuario.id);
+        const token = await generarJWT( usuario.user_id);
 
-
+        console.log(token, 'Token generado')
         res.json({
             usuario,
             token

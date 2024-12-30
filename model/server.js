@@ -21,8 +21,10 @@ class Server {
 
     async conectarDB(){
         try {
+            // Autenticar conexion a la base de datos
             await db.authenticate();
             console.log("Database online")
+            
         } catch (error) {
             throw new Error(error);
             
