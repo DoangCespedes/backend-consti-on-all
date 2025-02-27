@@ -1,7 +1,7 @@
 const {Router} = require('express');
 const { check } = require('express-validator');
 
-const { login } = require('../controllers/auth');
+const { login, profile, logout } = require('../controllers/auth');
 const { validarCampos } = require('../middlewares/validar-campos');
 
 
@@ -12,5 +12,9 @@ router.post('/login',[
     check('password', 'La contrasena es obligatoria').not().isEmpty(),
     validarCampos
 ], login);
+
+router.get('/profile', profile);
+
+router.get('/logout', logout);
 
 module.exports = router;

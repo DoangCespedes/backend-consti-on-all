@@ -35,7 +35,12 @@ class Server {
 
     middlewares(){
         //CORS
-        this.app.use( cors()) ;
+        this.app.use(cors({
+            origin: 'http://localhost:9000', // Tu dominio del frontend
+            credentials: true // Permite el uso de cookies
+        }));
+
+        
 
         //lectura y parseo del body
         this.app.use(express.json() );
